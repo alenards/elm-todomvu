@@ -6,6 +6,31 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
 
+{-| Todo MVU
+
+Model
+View
+Update
+
+-}
+main : Program () Model Msg
+main =
+    Browser.sandbox
+        { init = init
+        , view = view
+        , update = update
+        }
+
+
+
+-- MODEL
+
+
+{-| indicate the Model could not have data
+
+second value is the current value of input
+
+-}
 type Model
     = Initial
     | Model String Details
@@ -21,35 +46,44 @@ type alias Todo =
     }
 
 
+
+-- Apologies Noah Z Gordon
+
+
 type Msg
     = NoOp
-    | UpdateTodo String
+    | ValueUpdated String
 
 
-main : Program () Model Msg
-main =
-    -- When you work in Ellie, you'll be using a sandbox
-    Browser.sandbox
-        { init = init
-        , view = view
-        , update = update
-        }
-
-
-
--- MODEL
-
-
-init : Model
 init =
     Initial
 
 
-createTodo : String -> Todo
-createTodo description =
+makeTodo : String -> Todo
+makeTodo description =
     { description = description
     , completed = False
     }
+
+
+getDetails : Model -> Details
+getDetails model =
+    case model of
+        Initial ->
+            { entries = [] }
+
+        Model _ details ->
+            details
+
+
+getCurrentInput : Model -> String
+getCurrentInput model =
+    case model of
+        Initial ->
+            ""
+
+        Model current _ ->
+            current
 
 
 
@@ -57,7 +91,11 @@ createTodo description =
 
 
 view : Model -> Html Msg
-view _ =
+view model =
+    let
+        currValue =
+            getCurrentInput model
+    in
     div
         [ style "display" "flex"
         , style "flex-direction" "column"
@@ -66,22 +104,16 @@ view _ =
         , style "height" "100vh"
         ]
         [ h1 [] [ text "Extreme Lofi Todo" ]
-        , input [ onInput UpdateTodo ] []
+        , input
+            [ onInput ValueUpdated
+            , value currValue
+            ]
+            []
         ]
 
 
 
 -- UPDATE
-
-
-handleTodoUpdate : String -> Model -> Model
-handleTodoUpdate newValue model =
-    case model of
-        Initial ->
-            Model newValue { entries = [] }
-
-        Model _ details ->
-            Model newValue details
 
 
 update : Msg -> Model -> Model
@@ -90,5 +122,7 @@ update msg model =
         NoOp ->
             model
 
-        UpdateTodo newValue ->
-            handleTodoUpdate newValue model
+        ValueUpdated currValue ->
+            -- what to do?
+            --               Details vvvvvv
+            Model currValue { entries = [] }
